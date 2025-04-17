@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dino Game Clone</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #f7f7f7;
+      font-family: sans-serif;
+    }
+    canvas {
+      display: block;
+      background: #fff;
+      border-bottom: 2px solid #444;
+    }
+  </style>
+</head>
+    <a href="../Pages/Memory_game.html">Link to Memory Game</a>
+    <a href="../index.html"> Link to Bootstrap Resume</a>
+    <a href="../Pages/From_scratch.html">Link to From Scratch Page</a>
+<body>
+<canvas id="gameCanvas" width="800" height="200"></canvas>
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+let dino = {
+  x: 50,
+  y: 150,
+  width: 40,
+  height: 40,
+  vy: 0,
+  gravity: 1.5,
+  jumping: false,
+};
+
+let cactus = {
+  x: canvas.width,
+  y: 160,
+  width: 20,
+  height: 40,
+  speed: 6,
+};
+
+let bird = {
+  x: canvas.width + 400,
+  y: 100,
+  width: 30,
+  height: 20,
+  speed: 6,
+};
+
+let score = 0;
+let gameOver = false;
+
+function drawDino() {
+  ctx.fillStyle = "#555";
+  ctx.fillRect(dino.x, dino.y, dino.width, dino.height);
+}
+
+function drawCactus() {
+  ctx.fillStyle = "green";
+  ctx.fillRect(cactus.x, cactus.y, cactus.width, cactus.height);
+}
+
+function drawBird() {
+  ctx.fillStyle = "#333";
+  ctx.beginPath();
+  ctx.ellipse(bird.x + bird.width / 2, bird.y + bird.height / 2, bird.width / 2, bird.height / 2, 0, 0, 2 * Math.PI);
+  ctx.fill();
+}
+
+function drawScore() {
+  ctx.fillStyle = "#000";
+  ctx.font = "16px Arial";
+  ctx.fillText("Score: " + score, 700, 20);
+}
+
+function update() {
+  if (gameOver) return;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Dino physics
+  dino.y += dino.vy;
+  dino.vy += dino.gravity;
+  if (dino.y > 150) {
+    dino.y = 150;
+    dino.vy = 0;
+    dino.jumping = false;
+  }
+
+  // Move cactus
+  cactus.x -= cactus.speed;
+  if (cactus.x + cactus.width < 0) {
+    cactus.x = canvas.width + Math.random() * 200;
+    score++;
+  }
+
+  // Move bird
+  bird.x -= bird.speed;
+  if (bird.x + bird.width < 0) {
+    bird.x = canvas.width + 300 + Math.random() * 300;
+    bird.y = 80 + Math.random() * 50; // vary height
+  }
+
+  // Collision detection
+  const dinoBottom = dino.y + dino.height;
+  const dinoRight = dino.x + dino.width;
+  const cactusRight = cactus.x + cactus.width;
+  const birdRight = bird.x + bird.width;
+
+  const hitCactus =
+    dino.x < cactusRight && dinoRight > cactus.x && dino.y < cactus.y + cactus.height && dinoBottom > cactus.y;
+
+  const hitBird =
+    dino.x < birdRight && dinoRight > bird.x && dino.y < bird.y + bird.height && dinoBottom > bird.y;
+
+  if (hitCactus || hitBird) {
+    gameOver = true;
+    ctx.fillStyle = "red";
+    ctx.font = "24px Arial";
+    ctx.fillText("Game Over! Refresh to try again.", 250, 100);
+    return;
+  }
+
+  drawDino();
+  drawCactus();
+  drawBird();
+  drawScore();
+
+  requestAnimationFrame(update);
+}
+
+window.addEventListener("keydown", function (e) {
+  if (e.code === "Space" || e.code === "ArrowUp") {
+    if (!dino.jumping) {
+      dino.vy = -20;
+      dino.jumping = true;
+    }
+  }
+});
+
+update();
+</script>
+</body>
+</html>
